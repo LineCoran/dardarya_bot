@@ -8,6 +8,8 @@ const initializeChatSession = () => ({
     is_set_admin_process: false,
     first_name: '',
     second_name: '',
+    is_owner: false,
+    username: '',
 });
 
 export const dbService = {
@@ -29,10 +31,9 @@ export const dbService = {
     },
 
     saveUserSession: async (chatId, session) => {
-        console.log(session)
         await pool.query(
-          `INSERT INTO user_sessions (chat_id, is_create_order_process, last_message_id, is_send_photo, is_admin, is_set_admin_process, first_name, second_name)
-           VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
+          `INSERT INTO user_sessions (chat_id, is_create_order_process, last_message_id, is_send_photo, is_admin, is_set_admin_process, first_name, second_name, is_owner, username)
+           VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10)
            ON CONFLICT (chat_id) 
            DO UPDATE SET 
              is_create_order_process = $2,
@@ -41,7 +42,9 @@ export const dbService = {
              is_admin = $5,
              is_set_admin_process = $6,
              first_name = $7,
-             second_name = $8
+             second_name = $8,
+             is_owner = $9,
+             username = $10
              `,
           [
             chatId,
@@ -52,6 +55,8 @@ export const dbService = {
             session.is_set_admin_process,
             session.first_name,
             session.second_name,
+            session.is_owner,
+            session.username
         ]
         );
       },

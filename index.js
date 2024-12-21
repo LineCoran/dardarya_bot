@@ -10,6 +10,8 @@ const MAIN_ADMIN = 'alexeiiiii';
 const SUB_MAIN_ADMIN = ['Mazhako'];
 const DELETE_ADMIN_UNIQ_PREFIX = '/delete_admin--'
 
+const MAIN_ADMINS = [MAIN_ADMIN, ...SUB_MAIN_ADMIN];
+
 
 bot.setMyCommands([{ command: '/start', description: 'Начать' }]);
 
@@ -26,9 +28,9 @@ const createCategoryOptions = (inline_keyboard, options = { isBack: false, isMai
 };
 
 
-const getStartMsg = (isAdmin) => {
+const getStartMsg = (isOwner) => {
     let buttons = [...KEYBOARDS.START]
-    if (isAdmin) buttons = [...buttons, ...KEYBOARDS.ADMIN]
+    if (isOwner) buttons = [...buttons, ...KEYBOARDS.ADMIN]
     return {
         text: 'Вы находитесь в главном меню. Выберите действие!',
         options: createCategoryOptions(buttons),
@@ -76,8 +78,15 @@ bot.on('message', async (msg) => {
     try {
         const chatId = msg.chat.id;
         const text = msg.text;
+
+        
             
         const session = await dbService.getUserSession(chatId);
+
+        if (text === '/start') {
+            session.is_create_order_process = false;
+            session.is_set_admin_process = false;
+        }
 
         if (session.is_set_admin_process) {
             const isValidUser = text.includes('@') && text.length > 1;
@@ -96,22 +105,25 @@ bot.on('message', async (msg) => {
 
         if (session.is_create_order_process) {
 
-            if (!msg.photo) return sendMessage(chatId, 'Вы не отправили скриншот с товаром! Повторите отправку.', createCategoryOptions([], { isMain: true }))
-            if (!msg.caption) return sendMessage(chatId, 'Вы не отправили описание заказа! Повторите отправку.', createCategoryOptions([], { isMain: true }));
-            sendMessage(chatId, 'Оформляем ваш заказ');
+            if (!msg.photo) return sendMessage(chatId, 'Вы не отправили скриншот с товаром! Повторите отправку.', createCategoryOptions([], { isCancel: true }))
+            if (!msg.caption) return sendMessage(chatId, 'Вы не отправили описание заказа! Повторите отправку.', createCategoryOptions([], { isCancel: true }));
 
-            setTimeout(async () => {
-                await sendOrEditMessage(chatId, 'Заказ успешно оформлен!', createCategoryOptions(KEYBOARDS.NEW_ORDER, { isMain: true }));
+            try {
                 const admins = await getChatsWithAdmins();
-
                 admins.forEach(adminChatId => {
-                    sendMessage(adminChatId, `Новый заказ!`)
                     bot.forwardMessage(adminChatId, chatId, msg.message_id)
                 })
                 session.is_create_order_process = false;
-                dbService.saveUserSession(chatId, session)
-            }, 3000)
-            return
+                await dbService.saveUserSession(chatId, session)
+                if (session.is_admin) {
+                    return await sendMessage(chatId, 'Заказ успешно оформлен!', createCategoryOptions(KEYBOARDS.NEW_ORDER, { isMain: true }));
+                } else {
+                    return await sendOrEditMessage(chatId, 'Заказ успешно оформлен!', createCategoryOptions(KEYBOARDS.NEW_ORDER, { isMain: true }));
+                }
+                
+            } catch (error) {
+                await sendOrEditMessage(chatId, `Не удалось оформить заказ. Повторите попытку позже. Error: ${error.message}`, createCategoryOptions([], { isMain: true }));    
+            }
         }
 
 
@@ -121,19 +133,31 @@ bot.on('message', async (msg) => {
                 if (admins.includes(msg.chat.username)) {
                     try {
                         session.is_admin = true;
+                        session.is_owner = MAIN_ADMINS.includes(msg.chat.username);
                         await dbService.addChatWithAdmin(msg.chat.username, chatId);
-                        await bot.sendMessage(chatId, `Привет ${msg.chat.first_name} ${msg.chat.last_name}! Ты идентифицирован как администратор!`);
-                        await bot.sendMessage(chatId, `Я буду отправлять тебе все заказы которые будут приходить!`);
+                        let welcomeMsg = `Привет ${msg.chat.first_name} ${msg.chat.last_name}!\n`
+                        welcomeMsg += session.is_owner ? `Ты идентифицирован как Главный администратор!\n` : 'Ты идентифицирован как администратор!'
+                        if (session.is_owner) {
+                            welcomeMsg += `Дополнительное меню в самом низу "Режим администратора" видно только тебе.\n`;
+                            welcomeMsg += `Ты можешь назначать и удалять администраторов.\n`;
+                            welcomeMsg += `Тебя невозможно удалить из списка администраторов.\n`;
+                            welcomeMsg += `Заказы, которые создают пользователи приходят тебе и всем администраторам которых ты назначил.\n`;
+                        } else {
+                            welcomeMsg += `Я буду отправлять тебе все заказы которые будут приходить!`
+                        }
+                        
+                        await bot.sendMessage(chatId, welcomeMsg);
                     } catch (error) {
                         await bot.sendMessage(chatId, `Что-то пошло не так... Ошибка ${error.message}`);
                     }
                 }
 
-                const { text, options } = getStartMsg(session.is_admin);
+                const { text, options } = getStartMsg(session.is_owner);
                 const sentMessage = await bot.sendMessage(chatId, text, options );
                 session.last_message_id = sentMessage.message_id;
                 session.first_name = msg.chat.first_name || 'unkwon first_name';
                 session.second_name = msg.chat.last_name || 'unkwon last_name';
+                session.username = msg.chat.username;
                 dbService.saveUserSession(chatId, session);
             default:
                 return;
@@ -154,7 +178,7 @@ bot.on('callback_query', async (query) => {
     if (callback_query.includes(DELETE_ADMIN_UNIQ_PREFIX)) {
         const adminUserNameToDelete = callback_query.replaceAll(DELETE_ADMIN_UNIQ_PREFIX, '')
 
-        if ([...MAIN_ADMIN, ...SUB_MAIN_ADMIN].includes(adminUserNameToDelete)) {
+        if (MAIN_ADMINS.includes(adminUserNameToDelete)) {
             return sendOrEditMessage(chatId, `Пользователя @${adminUserNameToDelete} невозможно удалить из списка администраторов!`, createCategoryOptions([], { isMain: true }));
         }
 
@@ -186,7 +210,7 @@ bot.on('callback_query', async (query) => {
                 'Жду ваш заказ 😉', createCategoryOptions([], { isBack: true })
             )
         case '/back':
-            const { text, options } = getStartMsg(session.is_admin)
+            const { text, options } = getStartMsg(session.is_owner)
             session.is_create_order_process = false;
             session.is_set_admin_process = false;
             await dbService.saveUserSession(chatId, session);
@@ -231,8 +255,8 @@ bot.on('callback_query', async (query) => {
         try {
             let msgForSession = ''
             const allSession = await dbService.getSessions();
-            allSession.forEach(sessionItem => msgForSession += `Имя: ${sessionItem.first_name} ${sessionItem.second_name}\n Дата: ${sessionItem.timestamp}`)
-            return sendOrEditMessage(chatId, `Список всех сессий:\n ${msgForSession}`, createCategoryOptions([], { isBack: true } ))
+            allSession.forEach((sessionItem, index) => msgForSession += `${index + 1}.\nИмя: ${sessionItem.first_name} ${sessionItem.second_name}\nНик: ${sessionItem.username}\nДата: ${sessionItem.timestamp}\n\n\n`)
+            return sendOrEditMessage(chatId, `Список всех сессий:\n${msgForSession}`, createCategoryOptions([], { isBack: true } ))
 
         } catch (error) {
             return sendOrEditMessage(chatId, `Не удалось получить список сессий. Попробуйте позже. Error: ${error.message}`, createCategoryOptions([], { isBack: true } ))

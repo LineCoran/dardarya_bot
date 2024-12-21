@@ -110,7 +110,7 @@ export const KEYBOARDS = {
     ADMIN_BUTTONS: [
         [
             {
-                text: 'Список активных сессий',
+                text: 'Список активных чатов',
                 callback_data: '/admin_sessions',
             },
         ],

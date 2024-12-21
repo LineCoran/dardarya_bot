@@ -17,8 +17,10 @@ const CHAT_SESSION_TABLE = `
         is_admin BOOLEAN DEFAULT FALSE,
         second_name VARCHAR(32),
         first_name VARCHAR(32),
+        is_owner BOOLEAN DEFAULT FALSE,
         is_set_admin_process BOOLEAN DEFAULT FALSE,
-        timestamp timestamp default current_timestamp
+        timestamp timestamp default current_timestamp,
+        username VARCHAR(32)
     );
 `
 
