@@ -46,7 +46,7 @@ export const KEYBOARDS = {
         [
             {
                 text: 'Гайд',
-                url: 'https://vk.com/away.php?to=https%3A%2F%2Fdrive.google.com%2Ffile%2Fd%2F1cOX4YoP2uwrBgksWMQm1fAB1CyBJOTDO%2Fview%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAabCWoamAWtX5tmBvUbMutyyNSJlhbE38VmIgBJb0-6Kz_nSvK4IG4ugDJM_aem_C44DmseW-pkT3_NlIvEl2A&utf=1'
+                url: 'https://drive.google.com/file/d/1cOX4YoP2uwrBgksWMQm1fAB1CyBJOTDO/view?fbclid=PAZXh0bgNhZW0CMTEAAabCWoamAWtX5tmBvUbMutyyNSJlhbE38VmIgBJb0-6Kz_nSvK4IG4ugDJM_aem_C44DmseW-pkT3_NlIvEl2A'
             }
         ],
         [
@@ -169,13 +169,13 @@ export const KEYBOARDS = {
             [
                 {
                     text: 'Договор выкуп',
-                    url: 'https://vk.com/away.php?to=https%3A%2F%2Fdisk.yandex.by%2Fi%2Fxkm9du6VGXqk6g%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAaYWJlNFze01pE0oDDL_GfPd-q2QiZDGZcqjKHQI9iH73RitkeUqq4DbgLg_aem_Df8fGx5oWEVQGHLj2NpSzw&utf=1'
+                    url: 'https://disk.yandex.by/i/xkm9du6VGXqk6g?fbclid=PAZXh0bgNhZW0CMTEAAaYWJlNFze01pE0oDDL_GfPd-q2QiZDGZcqjKHQI9iH73RitkeUqq4DbgLg_aem_Df8fGx5oWEVQGHLj2NpSzw'
                 },
             ],
             [
                 {
                     text: 'Договор обучение',
-                    url: 'https://vk.com/away.php?to=https%3A%2F%2Fdisk.yandex.by%2Fi%2FlIQS0B3KtqjKVA%3Ffbclid%3DPAZXh0bgNhZW0CMTEAAabp3sn-wOpHaTfh_FkHq1L4cj8xeWLvwpQUo-XnKXXef48g5eYmlvgwkug_aem_tBezr_efIyplmcjsh-nQVg&utf=1'
+                    url: 'https://disk.yandex.by/i/lIQS0B3KtqjKVA?fbclid=PAZXh0bgNhZW0CMTEAAabp3sn-wOpHaTfh_FkHq1L4cj8xeWLvwpQUo-XnKXXef48g5eYmlvgwkug_aem_tBezr_efIyplmcjsh-nQVg'
                 },
             ]
         ]
