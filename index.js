@@ -229,7 +229,7 @@ bot.on('callback_query', async (query) => {
                 session.is_send_photo = true;
                 dbService.saveUserSession(chatId, session);
                 await bot.sendPhoto(chatId, fs.createReadStream(photoPath), { caption: 'Пример оформления' });
-                await sendMessage(chatId, 'Выберите действие в меню ниже:', createCategoryOptions(KEYBOARDS.ORDER, { isBack: true }))
+                return sendMessage(chatId, 'Выберите действие в меню ниже:', createCategoryOptions(KEYBOARDS.ORDER, { isBack: true }))
             } else {
                 return sendOrEditMessage(chatId, 'Выберите действие в меню ниже:', createCategoryOptions(KEYBOARDS.ORDER, { isBack: true }))
             }
