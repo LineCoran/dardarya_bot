@@ -4,8 +4,10 @@ const { Pool } = pg;
 
 dotenv.config();
 
+const url = 'postgres://default:4RgyHojslZd5@ep-dark-hat-28906063-pooler.eu-central-1.aws.neon.tech/verceldb'
+
 const pool = new Pool({
-    connectionString: process.env.POSTGRES_URL + "?sslmode=require",
+    connectionString: url + "?sslmode=require",
 })
 
 const CHAT_SESSION_TABLE = `
@@ -63,7 +65,7 @@ const ALL_TABLES = [
 let successFully = 0;
 
 pool.connect((err) => {
-    if (err) throw err
+    if (err) console.log(err)
 
     const createTable = (sqlText) => {
         pool.query(sqlText, (err, data) => {
