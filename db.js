@@ -4,10 +4,8 @@ const { Pool } = pg;
 
 dotenv.config();
 
-const url = 'postgres://default:4RgyHojslZd5@ep-dark-hat-28906063-pooler.eu-central-1.aws.neon.tech/verceldb'
-
 const pool = new Pool({
-    connectionString: url + "?sslmode=require",
+    connectionString: process.env.POSTGRES_URL + "?sslmode=require",
 })
 
 const CHAT_SESSION_TABLE = `

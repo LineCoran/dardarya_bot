@@ -3,7 +3,7 @@ import { KEYBOARDS } from './constants/constants.js';
 import fs from 'fs';
 import { dbService } from './service.js';
 
-const token = '7811056023:AAGojEjqXyQ-IGXRVOGSO8fPPQmO-Gp_Xag';
+const token = process.env.TG_TOKEN;
 const bot = new TelegramBot(token, { polling: true });
 
 const MAIN_ADMIN = 'alexeiiiii';
